@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudentBudget – Gestionarea banilor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--ink:#16302b;--mute:#5d7570;--line:#d9e3df;--accent:#0f766e;--warn:#c2410c;--c1:#0f766e;--c2:#2563eb;--c3:#9333ea;--c4:#d97706;--c5:#64748b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1917;--card:#16251f;--ink:#e6f1ed;--mute:#93aba5;--line:#274037;--accent:#2dd4bf;--warn:#fb923c}}
+:root[data-theme="dark"]{--bg:#0e1917;--card:#16251f;--ink:#e6f1ed;--mute:#93aba5;--line:#274037;--accent:#2dd4bf;--warn:#fb923c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:20px}
+h1{margin:0;font-size:clamp(28px,6vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.sub{color:var(--mute);margin:4px 0 0}
+.who{text-align:right;font-size:14px}
+.who input{font:inherit;font-weight:600;border:0;border-bottom:1px dashed var(--mute);background:transparent;color:var(--ink);text-align:right;width:210px;max-width:100%;padding:2px}
+.who div{color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:18px;margin:0 0 10px}
+.left{display:grid;gap:4px}
+.big{font-size:clamp(40px,12vw,72px);font-weight:800;line-height:1;letter-spacing:-.03em}
+.big.neg{color:var(--warn)}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:12px 0 6px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.bar i.over{background:var(--warn)}
+.meta{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;flex-wrap:wrap;gap:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}.who{text-align:left}}
+label{display:block;font-size:14px;color:var(--mute);margin:8px 0 2px}
+input,select,button{font:inherit}
+input[type=number],input[type=text]:not(.nm),input[type=date],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+button{cursor:pointer;border:0;border-radius:8px;padding:10px 16px;background:var(--accent);color:#fff;font-weight:600;margin-top:12px}
+:root[data-theme="dark"] button,@media (prefers-color-scheme:dark){button{color:#052e29}}
+button.ghost{background:transparent;color:var(--mute);padding:4px 8px;margin:0;font-weight:400}
+:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+.cat{margin:10px 0}
+.cat .row{display:flex;justify-content:space-between;font-size:15px}
+.cat .bar{height:8px;margin:4px 0 0}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.grow{flex:1;min-width:0}
+.grow small{display:block;color:var(--mute)}
+.amt{font-weight:600;white-space:nowrap}
+.empty{color:var(--mute);margin:0}
+footer{color:var(--mute);font-size:14px;text-align:center;padding:12px 0 24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>StudentBudget</h1>
+    <p class="sub">Gestionarea banilor pentru studenți</p>
+  </div>
+  <div class="who">
+    <input class="nm" id="nume" aria-label="Nume și Prenume student" placeholder="Sachko Artem" value="Sachko Artem" maxlength="60">
+    <div>FEIE, UTM</div>
+    <div>Realizat în cadrul cursului „TI și Securitate cibernetică”</div>
+  </div>
+</header>
+
+<section class="card" aria-live="polite">
+  <h2>Buget rămas luna aceasta</h2>
+  <div class="left"><span class="big" id="ramas">0 lei</span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <div class="meta"><span id="chelt">Cheltuit: 0 lei</span><span id="bug">Buget: 0 lei</span></div>
+</section>
+
+<div class="grid">
+  <section class="card">
+    <h2>Setează bugetul lunar</h2>
+    <label for="buget">Suma disponibilă (lei)</label>
+    <input type="number" id="buget" min="0" step="1" inputmode="decimal" placeholder="ex. 3000">
+    <button id="saveB">Salvează bugetul</button>
+    <h2 style="margin-top:22px">Adaugă cheltuială</h2>
+    <label for="cat">Categorie</label>
+    <select id="cat"></select>
+    <label for="suma">Sumă (lei)</label>
+    <input type="number" id="suma" min="0" step="0.01" inputmode="decimal" placeholder="ex. 45">
+    <label for="desc">Descriere (opțional)</label>
+    <input type="text" id="desc" maxlength="60" placeholder="ex. Cantină, abonament troleibuz">
+    <label for="data">Data</label>
+    <input type="date" id="data">
+    <button id="add">Adaugă cheltuiala</button>
+    <p id="err" class="sub" style="color:var(--warn)" role="alert"></p>
+  </section>
+
+  <section class="card">
+    <h2>Pe categorii</h2>
+    <div id="cats"></div>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Cheltuielile luni acesteia</h2>
+  <ul id="list"></ul>
+  <button class="ghost" id="reset">Șterge toate datele</button>
+</section>
+
+<section class="card">
+  <h2>Despre aplicație</h2>
+  <p>StudentBudget ajută studenții să țină evidența banilor: cât cheltuiesc pe mâncare, transport, cămin și studii și cât le-a mai rămas din bugetul lunar.</p>
+  <p class="sub">Funcții: setarea bugetului lunar · adăugarea și ștergerea cheltuielilor · totaluri pe categorii · calcul automat al sumei rămase cu avertizare la depășire · date salvate local în browser (nu se trimit nicăieri).</p>
+</section>
+
+<footer>© StudentBudget · <span id="fnume">Sachko Artem</span> · FEIE, UTM</footer>
+</div>
+
+<script>
+var CATS=[["Mâncare","var(--c1)"],["Transport","var(--c2)"],["Cămin","var(--c3)"],["Studii","var(--c4)"],["Altele","var(--c5)"]];
+var S={buget:0,items:[],nume:"Sachko Artem"};
+try{var raw=localStorage.getItem("studentbudget");if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+if(!S.nume)S.nume="Sachko Artem";
+function save(){try{localStorage.setItem("studentbudget",JSON.stringify(S))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function fmt(n){return (Math.round(n*100)/100).toLocaleString("ro-RO")+" lei"}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var month=new Date().toISOString().slice(0,7);
+$("cat").innerHTML=CATS.map(function(c,i){return '<option value="'+i+'">'+c[0]+'</option>'}).join("");
+$("data").value=new Date().toISOString().slice(0,10);
+$("nume").value=S.nume||"";
+function render(){
+  var cur=S.items.filter(function(x){return x.d.slice(0,7)===month});
+  var tot=cur.reduce(function(a,x){return a+x.a},0);
+  var rest=S.buget-tot;
+  var r=$("ramas");r.textContent=fmt(rest);r.className="big"+(rest<0?" neg":"");
+  $("chelt").textContent="Cheltuit: "+fmt(tot);$("bug").textContent="Buget: "+fmt(S.buget);
+  var p=S.buget>0?Math.min(100,tot/S.buget*100):(tot>0?100:0);
+  var pr=$("prog");pr.style.width=p+"%";pr.className=rest<0?"over":"";
+  $("buget").value=S.buget||"";
+  $("fnume").textContent=S.nume||"Sachko Artem";
+  $("cats").innerHTML=CATS.map(function(c,i){
+    var t=cur.filter(function(x){return x.c===i}).reduce(function(a,x){return a+x.a},0);
+    var w=tot>0?t/tot*100:0;
+    return '<div class="cat"><div class="row"><span>'+c[0]+'</span><b>'+fmt(t)+'</b></div><div class="bar"><i style="width:'+w+'%;background:'+c[1]+'"></i></div></div>'}).join("");
+  var sorted=cur.slice().sort(function(a,b){return b.d.localeCompare(a.d)||b.id-a.id});
+  $("list").innerHTML=sorted.length?sorted.map(function(x){
+    return '<li><span class="dot" style="background:'+CATS[x.c][1]+'"></span><span class="grow">'+esc(x.t||CATS[x.c][0])+'<small>'+CATS[x.c][0]+' · '+x.d.split("-").reverse().join(".")+'</small></span><span class="amt">'+fmt(x.a)+'</span><button class="ghost" data-id="'+x.id+'" aria-label="Șterge cheltuiala">Șterge</button></li>'}).join(""):'<li><p class="empty">Nu ai nicio cheltuială încă. Adaugă prima cheltuială din formular.</p></li>';
+}
+$("saveB").onclick=function(){var v=parseFloat($("buget").value);S.buget=isNaN(v)||v<0?0:v;save();render()};
+$("add").onclick=function(){
+  var a=parseFloat($("suma").value),d=$("data").value;
+  if(isNaN(a)||a<=0){$("err").textContent="Introdu o sumă mai mare ca 0.";return}
+  if(!d){$("err").textContent="Alege data cheltuielii.";return}
+  $("err").textContent="";
+  S.items.push({id:Date.now(),c:+$("cat").value,a:a,t:$("desc").value.trim(),d:d});
+  if(d.slice(0,7)!==month){month=d.slice(0,7)}
+  $("suma").value="";$("desc").value="";save();render()};
+$("list").onclick=function(e){var id=e.target.getAttribute("data-id");if(!id)return;S.items=S.items.filter(function(x){return x.id!==+id});save();render()};
+$("reset").onclick=function(){if(confirm("Sigur ștergi toate datele?")){S={buget:0,items:[],nume:S.nume};save();render()}};
+$("nume").oninput=function(){S.nume=this.value;save();$("fnume").textContent=S.nume||"Sachko Artem"};
+render();
+</script>
+</body>
+</html>
